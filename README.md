@@ -113,11 +113,5 @@ This project successfully established the foundation for the 30-day challenge by
 
 **Day 1 Goal: ACHIEVED**
 
-\<p align="center"\>
-<br>
-<br>
-Made with \<span style="color: \#dc3545;"\>&\#x2764;\</span\> by Harsh Dave
-\</p\>
-
 ```
 ```
