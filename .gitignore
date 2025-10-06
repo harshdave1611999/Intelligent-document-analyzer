@@ -1,0 +1,10 @@
+# .gitignore
+
+# 1. Critical: Ignore the file containing your API Key
+.env
+
+# 2. Ignore the Python virtual environment folder
+venv/
+__pycache__/
+*.pyc
+*.log

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1: Intelligent Document Analyzer (E2E)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --text-dark: #343a40;
+            --border-light: #ced4da;
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main {
+            flex: 1; /* Allows the main content to grow and push the footer down */
+            padding: 20px;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: 50px auto; 
+            background: var(--bg-white); 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); 
+        }
+        
+        h1 { 
+            color: var(--primary-color); 
+            border-bottom: 3px solid var(--primary-color); 
+            padding-bottom: 10px; 
+            margin-bottom: 25px; 
+            font-weight: 600;
+        }
+        
+        p { margin-bottom: 20px; font-weight: 300; }
+
+        /* Custom File Drop Zone Styling */
+        .drop-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+            padding: 20px;
+            border: 3px dashed var(--primary-color);
+            border-radius: 10px;
+            background-color: #e9f5ff;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .drop-zone:hover {
+            background-color: #d8edff;
+        }
+        /* Hide the native file input visually */
+        input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .file-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Button Styling */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        button { 
+            flex-grow: 1;
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            transition: background-color 0.3s, transform 0.1s; 
+            font-weight: 600;
+        }
+        #analyzeBtn { 
+            background-color: var(--secondary-color); 
+            color: white; 
+        }
+        #analyzeBtn:hover { 
+            background-color: #1e7e34; 
+            transform: translateY(-1px);
+        }
+        #resetBtn { 
+            background-color: var(--danger-color); 
+            color: white; 
+        }
+        #resetBtn:hover { 
+            background-color: #bd2130; 
+            transform: translateY(-1px);
+        }
+        button:disabled { 
+            background-color: #adb5bd; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+
+        /* Result and Status Styling */
+        #loading { 
+            margin-top: 20px; 
+            color: var(--primary-color); 
+            font-weight: 600;
+            text-align: center;
+        }
+        .result-box { 
+            margin-top: 30px; 
+            padding: 25px; 
+            border: 1px solid var(--border-light); 
+            border-radius: 8px; 
+            background-color: var(--bg-white); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        pre { 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            background: var(--bg-light); 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-left: 5px solid var(--secondary-color);
+            border-radius: 4px; 
+            font-size: 0.95rem;
+        }
+        .error { 
+            color: var(--danger-color); 
+            font-weight: bold; 
+            text-align: center;
+            padding: 10px;
+            border: 1px solid var(--danger-color);
+            border-radius: 4px;
+            margin-top: 20px;
+            background-color: #fdd;
+        }
+
+        /* Footer Styling */
+        .footer {
+            margin-top: 50px;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6c757d;
+            background-color: var(--bg-light);
+            border-top: 1px solid var(--border-light);
+        }
+        .heart {
+            color: var(--danger-color); 
+            margin: 0 5px;
+            animation: beat 1.5s infinite;
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <h1>Intelligent Document Analyzer</h1>
+            <p>Upload a PDF document below to receive an instant summary and key takeaways powered by a Large Language Model (LLM).</p>
+            
+            <form id="uploadForm">
+                <div class="file-input-wrapper">
+                    <div class="drop-zone">
+                        <label for="pdfFile" id="dropLabel">
+                            <span style="font-size: 1.2rem;">📂 Click to select PDF or Drag & Drop here</span>
+                            <span class="file-name" id="selectedFileName">No file chosen (Max 32 MB, .pdf only)</span>
+                        </label>
+                        <input type="file" id="pdfFile" name="file" accept=".pdf" required>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" id="analyzeBtn">Analyze Document</button>
+                    <button type="button" id="resetBtn" class="reset-button">Reset</button>
+                </div>
+            </form>
+
+            <div id="loading" style="display: none;">
+                <p>Processing document and calling AI model... Please wait.</p>
+            </div>
+
+            <div id="result" class="result-box" style="display: none;">
+                <h2>Analysis Result for: <span id="filenameDisplay"></span></h2>
+                <pre id="analysisOutput"></pre>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        Made with <span class="heart">❤️</span> by Harsh Dave
+    </footer>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('pdfFile');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resetBtn = document.getElementById('resetBtn'); 
+        const loadingDiv = document.getElementById('loading');
+        const resultDiv = document.getElementById('result');
+        const analysisOutput = document.getElementById('analysisOutput');
+        const filenameDisplay = document.getElementById('filenameDisplay');
+        const errorDiv = document.getElementById('error');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const dropZone = document.querySelector('.drop-zone');
+
+        function resetUI() {
+            fileInput.value = ''; 
+            selectedFileName.textContent = 'No file chosen (Max 32 MB, .pdf only)';
+            selectedFileName.style.color = 'var(--text-dark)';
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'none';
+            analyzeBtn.disabled = false;
+            analysisOutput.textContent = '';
+            filenameDisplay.textContent = '';
+        }
+
+        // --- Event Listeners ---
+
+        // 1. File Selection Handler (to update the file name display)
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                selectedFileName.textContent = `Selected: ${fileInput.files[0].name}`;
+                selectedFileName.style.color = 'var(--primary-color)';
+            } else {
+                resetUI();
+            }
+        });
+
+        // 2. Reset Button
+        resetBtn.addEventListener('click', resetUI);
+        
+        // 3. Form Submission (Analysis)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Check if a file is actually selected (required by HTML, but good to double-check)
+            if (!fileInput.files || fileInput.files.length === 0) {
+                errorDiv.textContent = "Please select a PDF file before analyzing.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // 1. UI State: Start Loading
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            analyzeBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // 2. Call the Backend API
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const data = await response.json();
+
+                // 3. Handle Response
+                if (response.ok && data.status === 'success') {
+                    filenameDisplay.textContent = data.filename;
+                    analysisOutput.textContent = data.analysis;
+                    resultDiv.style.display = 'block';
+                } else {
+                    errorDiv.textContent = data.error || "An unknown analysis error occurred.";
+                    errorDiv.style.display = 'block';
+                }
+            } catch (networkError) {
+                errorDiv.textContent = "Network Error: Could not connect to the analysis service. Is the Flask server running?";
+                errorDiv.style.display = 'block';
+            } finally {
+                // 4. UI State: Stop Loading
+                loadingDiv.style.display = 'none';
+                analyzeBtn.disabled = false;
+                resetBtn.disabled = false;
+            }
+        });
+
+    </script>
+</body>
+</html>
