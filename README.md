@@ -18,7 +18,7 @@ The application allows a user to upload a PDF, which is processed by a Python/Fl
 ### ✨ Live Demo
 
 **(After deploying to Vercel, replace this link with your active deployment URL.)**
-> **[View Live Application Here](intelligent-document-analyzer-gp58z351g.vercel.app)**
+> **[View Live Application Here]( https://intelligent-document-analyzer.vercel.app/ )**
 
 ---
 
